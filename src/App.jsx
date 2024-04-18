@@ -6,6 +6,7 @@ function App() {
   const [cards, setCards] = useState([])
   const [score, setScore] = useState(0)
   const [bestScore, setBestCore] = useState(0)
+  const [clicked, setClicked] = useState([])
 
   const textTitle = "Memory Card Game"
   const message =
@@ -15,9 +16,34 @@ function App() {
     fetch("https://dog.ceo/api/breeds/image/random/12")
       .then((response) => response.json())
       .then((data) => {
-        setCards(data.message)
+        const cardsArr = []
+        for (let index = 0; index < data.message.length; index++) {
+          cardsArr.push({ id: index, image: data.message[index] })
+        }
+
+        setCards(cardsArr)
       })
   }, [])
+
+  function shuffleCards(arr) {
+    return arr.sort(() => Math.random() - 0.8)
+  }
+
+  function handleClick(id) {
+    const alreadyClicked = clicked.find((el) => el === id)
+    if (alreadyClicked) {
+      const best = score > bestScore ? score : bestScore
+      setBestCore(best)
+      setScore(0)
+      setClicked([])
+    } else {
+      setScore((score) => score + 1)
+      setClicked([...clicked, id])
+    }
+
+    const shuffled = shuffleCards(cards)
+    setCards(shuffled)
+  }
 
   return (
     <>
@@ -31,7 +57,7 @@ function App() {
         <h4>Best Score: {bestScore}</h4>
       </div>
 
-      <Cards data={cards} />
+      <Cards data={cards} handleClick={handleClick} />
     </>
   )
 }
